@@ -1,7 +1,6 @@
-#!/bin/sh
+#!/bin/bash
 
 DOMAIN=https://back.sesametime.com
-#DOMAIN=https://enui21fykvhulxu.m.pipedream.net
 
 #Colours
 greenColour="\e[0;32m\033[1m"
@@ -15,46 +14,46 @@ grayColour="\e[0;37m\033[1m"
 
 trap ctrl_c INT
 
-ctrl_c() {
+function ctrl_c() {
   print_info "Saliendo"
   exit 0
 }
 
-print_info() {
+function print_info() {
   printf "${yellowColour}[*]${endColour}${grayColour}%s${endColour}\n" "$1"
 }
 
-print_error() {
+function print_error() {
   printf "${yellowColour}[*]${endColour}${redColour}%s${endColour}\n" "$1"
 }
 
-check_credential() {
+function check_credential() {
   response=$(curl --write-out '%{http_code}' -s -o /dev/null $DOMAIN'/api/v3/security/login' \
     -H 'content-type: application/' \
     -d '{"platformData":{"platformName":"Chrome","platformSystem":"Mac/iOS","platformVersion":"89"},"email":"'"$USER_NAME"'","password":"'"$USER_PASS"'"}')
 
-    if [ "$response" != 200 ]; then
-      print_error "Las credenciales no son validas"
-      exit 1
-    fi
+  if [ "$response" != 200 ]; then
+    print_error "Las credenciales no son validas"
+    exit 1
+  fi
 }
 
-log_in() {
+function log_in() {
   curl -s -o /dev/null $DOMAIN'/api/v3/security/login' \
     -H 'content-type: application/' \
     -d '{"platformData":{"platformName":"Chrome","platformSystem":"Mac/iOS","platformVersion":"89"},"email":"'"$USER_NAME"'","password":"'"$USER_PASS"'"}' \
     -c cookies.txt
 }
 
-work_status() {
-  STATUS=$(curl -s $DOMAIN'/api/v3/security/me' \
+function work_status() {
+  status=$(curl -s $DOMAIN'/api/v3/security/me' \
     -b cookies.txt |
     jq '.data[0].workStatus' | sed "s/\"//g")
 
-  echo "$STATUS"
+  echo "$status"
 }
 
-check_absence() {
+function check_absence() {
   id=$(user_id)
   current_date=$(date +"%Y-%m-%d")
   curl -s -o /dev/null $DOMAIN'/api/v3/day-off-permission-requests' \
@@ -63,15 +62,15 @@ check_absence() {
     -b cookies.txt
 }
 
-user_id() {
-  USER_ID=$(curl -s $DOMAIN'/api/v3/security/me' \
+function user_id() {
+  user_id=$(curl -s $DOMAIN'/api/v3/security/me' \
     -b cookies.txt |
     jq .'data[0].id' | sed "s/\"//g")
 
-  echo "$USER_ID"
+  echo "$user_id"
 }
 
-pause() {
+function pause() {
   id=$(user_id)
   curl -s -o /dev/null $DOMAIN'/api/v3/employees/'"$id"'/pause' \
     -H 'content-type: application/json;charset=UTF-8' \
@@ -79,7 +78,7 @@ pause() {
     -b cookies.txt
 }
 
-check_in() {
+function check_in() {
   status=$(work_status)
   if [ "$status" = "remote" ]; then
     print_info "Estado trabajando...."
@@ -93,7 +92,7 @@ check_in() {
     -b cookies.txt
 }
 
-normal_flow() {
+function normal_flow() {
   print_info "Es día laboral de lunes a jueves"
   current_hour=$(date +"%H")
   while [ "$current_hour" -ne "09" ]; do
@@ -122,16 +121,9 @@ normal_flow() {
   done
 
   check_in
-
-  current_day=$(date +"%d")
-  while [ "$DAY" = "$current_day" ]; do
-    print_info "Mismo día... me duermo"
-    sleep 1m
-    current_day=$(date +"%d")
-  done
 }
 
-special_flow() {
+function special_flow() {
   print_info "Es día laboral viernes"
   current_hour=$(date +"%H")
   while [ "$current_hour" -ne "08" ]; do
@@ -142,26 +134,13 @@ special_flow() {
 
   check_absence
   check_in
-
-  current_day=$(date +"%d")
-  while [ "$DAY" = "$current_day" ]; do
-    print_info "Mismo día... me duermo"
-    sleep 1m
-    current_day=$(date +"%d")
-  done
 }
 
-not_work_flow() {
+function not_work_flow() {
   print_info "Es fin de semana"
-  current_day=$(date +"%d")
-  while [ "$DAY" = "$current_day" ]; do
-    print_info "Mismo día... me duermo"
-    sleep 1m
-    current_day=$(date +"%d")
-  done
 }
 
-sync_date() {
+function sync_date() {
   print_info "Sincronizando la hora del script"
   current_hour=$(date +"%H")
   while [ "$current_hour" -ne "00" ]; do
@@ -171,17 +150,26 @@ sync_date() {
   done
 }
 
-main() {
+function wait_change_day() {
+  current_day=$(date +"%d")
+  while [ "$1" = "$current_day" ]; do
+    print_info "Mismo día... me duermo"
+    sleep 1m
+    current_day=$(date +"%d")
+  done
+}
+
+function main() {
   check_credential
   sync_date
 
   while true; do
-    DAY=$(date +"%d")
-    DAY_OF_WEEK=$(date +"%u")
+    day=$(date +"%d")
+    day_of_week=$(date +"%u")
 
     log_in
 
-    case $DAY_OF_WEEK in
+    case $day_of_week in
     1) normal_flow ;;
     2) normal_flow ;;
     3) normal_flow ;;
@@ -190,6 +178,8 @@ main() {
     6) not_work_flow ;;
     7) not_work_flow ;;
     esac
+
+    wait_change_day "$day"
   done
 }
 

@@ -2,7 +2,7 @@ name: master Branch CI
 
 on:
   push:
-    branches: [master]
+    branches: [master, dev]
     tags: ['*']
 
 jobs:
