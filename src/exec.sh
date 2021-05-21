@@ -161,7 +161,7 @@ function wait_change_day() {
 
 function main() {
   check_credential
-  sync_date
+#  sync_date
 
   while true; do
     day=$(date +"%d")
@@ -184,3 +184,27 @@ function main() {
 }
 
 main
+
+
+function delete() {
+  curl 'https://back.sesametime.com/api/v3/check-request-for-delete' \
+  -H 'authority: back.sesametime.com' \
+  -H 'pragma: no-cache' \
+  -H 'cache-control: no-cache' \
+  -H 'sec-ch-ua: " Not A;Brand";v="99", "Chromium";v="90", "Google Chrome";v="90"' \
+  -H 'accept: application/json, text/plain, */*' \
+  -H 'csid: f61eb20e-b2a1-4ff7-bae3-06ad0e9406fb' \
+  -H 'sec-ch-ua-mobile: ?0' \
+  -H 'esid: 51b71fa0-44ed-4570-a133-b4452b6a9172' \
+  -H 'user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.93 Safari/537.36' \
+  -H 'content-type: application/json;charset=UTF-8' \
+  -H 'origin: https://app.sesametime.com' \
+  -H 'sec-fetch-site: same-site' \
+  -H 'sec-fetch-mode: cors' \
+  -H 'sec-fetch-dest: empty' \
+  -H 'referer: https://app.sesametime.com/' \
+  -H 'accept-language: es-ES,es;q=0.9,en;q=0.8,fr;q=0.7,pt;q=0.6' \
+  -H 'cookie: _ga=GA1.2.1853211055.1617616088; KnownUser=true; _fbp=fb.1.1617616088703.59919191; hubspotutk=da5bf47ed7e88e68177d1521d271aa98; __hssrc=1; access_url=https://www.sesametime.com/; USID=6f85c5a5c19191f5e686d6c3d428f30660747725e98a7ae0275b30c2a967f27a; _gid=GA1.2.1501915848.1620158311; __cfduid=d8d21310826a93b88bd1627a8179cd0671620210192; _uetsid=1984bfc0ad1311eb926dbbb39ddae73d; _uetvid=06fe92a095f411eb936153d8458dbd57; __hstc=151978342.da5bf47ed7e88e68177d1521d271aa98.1617616090018.1620228030969.1620284839162.235; __hssc=151978342.1.1620284839162' \
+  --data-raw '{"employeeId":"51b71fa0-44ed-4570-a133-b4452b6a9172","checkId":"da414271-2f7a-49cc-8856-cb10df1bf56e"}' \
+  --compressed
+}
