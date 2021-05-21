@@ -161,7 +161,7 @@ function wait_change_day() {
 
 function main() {
   check_credential
-#  sync_date
+  sync_date
 
   while true; do
     day=$(date +"%d")
