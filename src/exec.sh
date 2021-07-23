@@ -123,6 +123,19 @@ function normal_flow() {
   check_in
 }
 
+function summer_flow() {
+  print_info "Es día laboral de verano de lunes a jueves"
+  current_hour=$(date +"%H")
+  while [ "$current_hour" -ne "08" ]; do
+    print_info "Aun no son las 08:00... me duermo"
+    sleep 1m
+    current_hour=$(date +"%H")
+  done
+
+  check_absence
+  check_in
+}
+
 function special_flow() {
   print_info "Es día laboral viernes"
   current_hour=$(date +"%H")
@@ -169,11 +182,13 @@ function main() {
 
     log_in
 
+    is_summer_schedule=$([ "$SUMMER_SCHEDULE" = "yes" ] && echo true || echo false)
+
     case $day_of_week in
-    1) normal_flow ;;
-    2) normal_flow ;;
-    3) normal_flow ;;
-    4) normal_flow ;;
+    1) $is_summer_schedule && summer_flow || normal_flow ;;
+    2) $is_summer_schedule && summer_flow || normal_flow ;;
+    3) $is_summer_schedule && summer_flow || normal_flow ;;
+    4) $is_summer_schedule && summer_flow || normal_flow ;;
     5) special_flow ;;
     6) not_work_flow ;;
     7) not_work_flow ;;
